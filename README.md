@@ -4,6 +4,11 @@
 
 An open-source, interactive checklist that helps developers ship AI-powered features responsibly. Covers prompt security, data privacy, LLM monitoring, model governance, cost control, and regulatory compliance.
 
+<p align="center">
+  <img src="assets/screenshot-overview.png" width="420" alt="AI-Check checklist overview" />
+  <img src="assets/screenshot-recommendation.png" width="420" alt="Expanded recommendation with tools and OWASP references" />
+</p>
+
 ---
 
 ## What This Is
