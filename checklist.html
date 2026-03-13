@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI-Check — AI & LLM Security Governance Checklist</title>
+<meta name="description" content="A comprehensive, interactive security and governance checklist for developers integrating AI and Large Language Models into production applications.">
+<meta name="keywords" content="AI security checklist, LLM governance, prompt injection prevention, responsible AI, AI safety, EU AI Act compliance, LLM monitoring, AI risk assessment, LLMOps, AI audit">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #ffffff;
+    --surface: #f8f8f9;
+    --surface-hover: #f0f0f2;
+    --border: rgba(0,0,0,0.06);
+    --border-strong: rgba(0,0,0,0.12);
+    --text: #111111;
+    --text-muted: #555555;
+    --text-dim: #999999;
+    --accent: #111111;
+    --accent-light: rgba(17,17,17,0.06);
+    --check: #22c55e;
+    --check-bg: rgba(34,197,94,0.08);
+    --severity-critical: #111;
+    --severity-high: #444;
+    --severity-medium: #777;
+    --severity-low: #aaa;
+    --radius: 12px;
+    --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    padding: 80px 48px 56px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+  }
+
+  .hero-badge::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text);
+  }
+
+  .hero h1 {
+    font-size: 44px;
+    font-weight: 900;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--text-muted);
+    max-width: 620px;
+  }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-container {
+    max-width: 960px;
+    margin: 0 auto 48px;
+    padding: 0 48px;
+  }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--text);
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .progress-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── CONTENT ─── */
+  .content {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 48px 80px;
+  }
+
+  /* ─── CATEGORY ─── */
+  .category {
+    margin-bottom: 48px;
+  }
+
+  .category-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .category-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--text);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+
+  .category-title {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .category-count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 3px 10px;
+    border-radius: 100px;
+    margin-left: auto;
+  }
+
+  /* ─── CHECKLIST ITEMS ─── */
+  .check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .check-item {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: start;
+    padding: 16px 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    transition: all var(--transition);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .check-item:hover {
+    background: var(--surface);
+    border-color: var(--border-strong);
+  }
+
+  .check-item.checked {
+    background: var(--check-bg);
+    border-color: rgba(34,197,94,0.15);
+  }
+
+  .check-item.checked .check-box {
+    background: var(--check);
+    border-color: var(--check);
+  }
+
+  .check-item.checked .check-box::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .check-item.checked .item-title {
+    text-decoration: line-through;
+    color: var(--text-dim);
+  }
+
+  .check-box {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-strong);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+    position: relative;
+    margin-top: 1px;
+  }
+
+  .check-box::after {
+    content: '';
+    width: 10px;
+    height: 6px;
+    border-left: 2px solid white;
+    border-bottom: 2px solid white;
+    transform: scale(0) rotate(-45deg);
+    transform-origin: center;
+    opacity: 0;
+    transition: all var(--transition);
+    position: absolute;
+    top: 3px;
+  }
+
+  .check-item.checked .check-box::after {
+    transform: scale(1) rotate(-45deg);
+  }
+
+  .item-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .item-title {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    transition: all var(--transition);
+  }
+
+  .item-why {
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.55;
+    color: var(--text-dim);
+  }
+
+  .severity {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    margin-top: 1px;
+  }
+
+  .severity.critical { background: var(--text); color: var(--bg); }
+  .severity.high { background: #e5e5e5; color: #333; }
+  .severity.medium { background: #f0f0f0; color: #666; }
+  .severity.low { background: #f8f8f8; color: #999; }
+
+  /* ─── FOOTER ─── */
+  .footer {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 48px 56px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-text {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .footer-link {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--border-strong);
+    padding-bottom: 2px;
+    transition: opacity var(--transition);
+  }
+
+  .footer-link:hover { opacity: 0.6; }
+
+  /* ─── RESET BUTTON ─── */
+  .reset-wrap {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 48px 16px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+
+  .reset-btn:hover {
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    .hero { padding: 48px 20px 36px; }
+    .hero h1 { font-size: 30px; }
+    .content, .progress-container, .footer, .reset-wrap { padding-left: 20px; padding-right: 20px; }
+    .check-item { grid-template-columns: 36px 1fr; gap: 4px; }
+    .severity { grid-column: 2; margin-top: 6px; width: fit-content; }
+    .footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    .reset-wrap, .progress-container { display: none; }
+    .check-item { border: 1px solid #ddd; break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <div class="hero-badge">AI &amp; LLM Governance</div>
+  <h1>AI Integration<br>Security Checklist</h1>
+  <p class="hero-subtitle">A comprehensive governance and security checklist for developers shipping AI-powered features. Covers LLM security, privacy compliance, monitoring, cost management, and responsible deployment.</p>
+</div>
+
+<!-- ─── PROGRESS ─── -->
+<div class="progress-container">
+  <div class="progress-bar-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 0</div>
+  </div>
+</div>
+
+<!-- ─── RESET ─── -->
+<div class="reset-wrap">
+  <button class="reset-btn" onclick="resetAll()">Reset all</button>
+</div>
+
+<!-- ─── CONTENT ─── -->
+<div class="content">
+
+  <!-- ━━━ 1. LLM SECURITY ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">1</div>
+      <div class="category-title">LLM Security</div>
+      <span class="category-count">7 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="llm-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Prompt injection defenses in place</div>
+          <div class="item-why">System prompts are isolated from user input. Validation and guardrails block attempts to override model instructions, exfiltrate data, or hijack behavior.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="llm-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Jailbreak resistance tested</div>
+          <div class="item-why">The model is hardened against techniques that bypass its safety rails — including role-play attacks, encoding tricks, and multi-turn escalation.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="llm-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Hallucination mitigation strategy</div>
+          <div class="item-why">Responses are grounded in verified data (RAG). Temperature is tuned low. Outputs include source citations and confidence disclaimers where needed.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="llm-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Bias and fairness audits conducted</div>
+          <div class="item-why">Model outputs are regularly tested across demographics. Diverse test scenarios ensure the system does not discriminate by age, gender, ethnicity, or language.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="llm-5">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Content moderation filters active</div>
+          <div class="item-why">Input and output filters catch toxic, harmful, illegal, or off-topic content. Abuse reporting mechanisms are available to end users.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="llm-6">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Knowledge base integrity protected</div>
+          <div class="item-why">Write access to RAG sources is restricted. All changes are version-controlled. A review process prevents data poisoning of the knowledge base.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="llm-7">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Red-team testing performed</div>
+          <div class="item-why">Adversarial testing simulates real-world attacks including prompt injection, jailbreaking, and data extraction before every major release.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 2. PRIVACY & COMPLIANCE ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">2</div>
+      <div class="category-title">Privacy &amp; Compliance</div>
+      <span class="category-count">6 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="priv-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">GDPR / data protection compliance</div>
+          <div class="item-why">No PII is stored without consent. Data processing agreements exist with all LLM providers. A processing register (Art. 30 GDPR) is maintained.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="priv-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Sensitive data handling policy</div>
+          <div class="item-why">Health, financial, or other special-category data has explicit consent flows, encryption at rest and in transit (TLS 1.2+), and access restrictions.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="priv-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">EU AI Act transparency requirements met</div>
+          <div class="item-why">Users are clearly informed they are interacting with an AI system. Documentation meets the forthcoming EU AI Act obligations for the system's risk tier.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="priv-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Copyright and liability safeguards</div>
+          <div class="item-why">Outputs are sourced from owned/licensed content only. Liability disclaimers are displayed. Legal review processes are in place for generated text.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="priv-5">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Audit logging implemented</div>
+          <div class="item-why">All API calls, errors, and model interactions are logged in a structured, PII-safe format. Log retention policies are defined. Central aggregation is set up.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="priv-6">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Data retention and deletion policy</div>
+          <div class="item-why">Conversation data has defined TTLs. Users can request deletion. Automated purge jobs ensure compliance with right-to-erasure requests.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 3. WEB SECURITY ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">3</div>
+      <div class="category-title">Application Security</div>
+      <span class="category-count">4 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="web-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">XSS protection for AI outputs</div>
+          <div class="item-why">All model-generated content is HTML-escaped before rendering. CSP headers block inline scripts. Sanitization libraries handle markdown/HTML outputs.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="web-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">CSRF and SSRF protections active</div>
+          <div class="item-why">Anti-CSRF tokens protect state-changing requests. Outbound connections are restricted to allow-listed endpoints. No user-controlled URLs are fetched server-side.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="web-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Secure session management</div>
+          <div class="item-why">Sessions use cryptographically strong IDs, short TTLs, HttpOnly + Secure + SameSite cookies, and protection against session fixation.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="web-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Input validation on all AI-facing routes</div>
+          <div class="item-why">Request payloads are validated for size, type, and format before reaching the model. Malformed or oversized inputs are rejected early.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 4. INFRASTRUCTURE & OPS ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">4</div>
+      <div class="category-title">Infrastructure &amp; Operations</div>
+      <span class="category-count">5 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="infra-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">API keys and secrets secured</div>
+          <div class="item-why">No credentials in client-side code or public repos. Keys are stored in environment variables or secret managers. Regular rotation is automated.</div>
+        </div>
+        <div class="severity critical">Critical</div>
+      </div>
+      <div class="check-item" data-id="infra-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Rate limiting and DoS protection</div>
+          <div class="item-why">Per-IP and per-session rate limits are enforced. WAF or CDN edge protection is active. CAPTCHAs trigger on suspicious patterns.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="infra-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Availability and fallback strategy</div>
+          <div class="item-why">Graceful degradation when the LLM provider is down. Retry logic with exponential backoff. Health-check endpoints and status pages are available.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="infra-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Vendor lock-in mitigated</div>
+          <div class="item-why">An abstraction layer sits between the app and the LLM API. Alternative providers have been evaluated. SLAs and exit strategies are documented.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="infra-5">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Least-privilege IAM policies</div>
+          <div class="item-why">Service accounts use minimal permissions. Network segmentation isolates AI workloads. Access is audited and reviewed periodically.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 5. LLM MONITORING & OBSERVABILITY ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">5</div>
+      <div class="category-title">LLM Monitoring &amp; Observability</div>
+      <span class="category-count">5 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="mon-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Latency and throughput tracking</div>
+          <div class="item-why">P50/P95/P99 response times are monitored. Alerts fire when latency exceeds thresholds. Dashboards show real-time and historical trends.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="mon-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Token usage and cost monitoring</div>
+          <div class="item-why">Input/output token counts are logged per request. Daily and monthly spend is tracked. Anomaly detection catches unexpected usage spikes.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="mon-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Response quality scoring</div>
+          <div class="item-why">Automated evaluations score response relevance, groundedness, and safety. Feedback loops (thumbs up/down) provide continuous quality signals.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="mon-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Drift and anomaly detection</div>
+          <div class="item-why">Statistical monitoring detects shifts in model behavior, topic distribution, or refusal rates. Alerts trigger when patterns deviate from baselines.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="mon-5">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Error rate and failure mode tracking</div>
+          <div class="item-why">API errors, timeouts, and content filter rejections are tracked separately. Root cause dashboards help distinguish model issues from infra problems.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 6. MODEL GOVERNANCE ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">6</div>
+      <div class="category-title">Model Governance</div>
+      <span class="category-count">5 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="gov-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Model versioning and changelog</div>
+          <div class="item-why">Every model swap or prompt change is version-tagged. A changelog documents what changed and why, enabling rollback to any previous state.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="gov-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Rollback plan documented and tested</div>
+          <div class="item-why">A one-click rollback to the previous model version is available. The process is documented and has been tested in a staging environment.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="gov-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Evaluation benchmarks defined</div>
+          <div class="item-why">A standardized test suite measures accuracy, safety, and task completion rates. Benchmarks run automatically before any model or prompt update ships.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="gov-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Model card or system documentation</div>
+          <div class="item-why">A model card documents the model used, its capabilities, known limitations, intended use cases, and ethical considerations.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="gov-5">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">A/B testing framework for model changes</div>
+          <div class="item-why">New models or prompt versions can be tested on a subset of traffic before full rollout, with quality metrics compared side by side.</div>
+        </div>
+        <div class="severity low">Low</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 7. COST MANAGEMENT ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">7</div>
+      <div class="category-title">Cost Management</div>
+      <span class="category-count">4 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="cost-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Budget caps and spending alerts</div>
+          <div class="item-why">Hard and soft spending limits are configured at the provider level. Alerts fire at 50%, 80%, and 100% of monthly budget thresholds.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="cost-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Per-request token budgets</div>
+          <div class="item-why">Max input and output token limits are enforced per request. Runaway conversations are capped. Context window usage is optimized.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="cost-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Cost attribution per feature</div>
+          <div class="item-why">Token usage is tagged by feature or endpoint, enabling granular cost visibility. Teams can identify which features drive disproportionate spend.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="cost-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Cost-efficiency optimization reviewed</div>
+          <div class="item-why">Prompt compression, caching, smaller models for simple tasks, and batch inference have been evaluated. Unit economics are documented.</div>
+        </div>
+        <div class="severity low">Low</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ━━━ 8. UX & RESPONSIBLE AI ━━━ -->
+  <div class="category">
+    <div class="category-header">
+      <div class="category-number">8</div>
+      <div class="category-title">UX &amp; Responsible AI</div>
+      <span class="category-count">4 items</span>
+    </div>
+    <div class="check-list">
+      <div class="check-item" data-id="ux-1">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Human escalation paths defined</div>
+          <div class="item-why">Users with urgent or complex issues are seamlessly routed to human agents. The AI clearly communicates its limitations and offers alternatives.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="ux-2">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">AI disclosure visible to users</div>
+          <div class="item-why">Users are clearly informed they are interacting with AI, not a human. The disclosure is persistent and not hidden in fine print.</div>
+        </div>
+        <div class="severity high">High</div>
+      </div>
+      <div class="check-item" data-id="ux-3">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">User feedback mechanism in place</div>
+          <div class="item-why">Users can report inaccurate, offensive, or unhelpful responses. Feedback is routed to the team for continuous improvement.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+      <div class="check-item" data-id="ux-4">
+        <div class="check-box"></div>
+        <div class="item-content">
+          <div class="item-title">Accessibility standards met</div>
+          <div class="item-why">The AI interface meets WCAG 2.1 AA. Screen readers can parse AI responses. Keyboard navigation works fully across the chat experience.</div>
+        </div>
+        <div class="severity medium">Medium</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ─── FOOTER ─── -->
+<div class="footer">
+  <span class="footer-text">Last updated: March 2026 · Update this checklist with every major change to your AI integration.</span>
+  <a href="https://github.com/mhmdgazzar/AI-Check" class="footer-link">github.com/mhmdgazzar/AI-Check</a>
+</div>
+
+<script>
+  const STORAGE_KEY = 'ai-check-state';
+
+  function loadState() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } 
+    catch { return {}; }
+  }
+
+  function saveState(state) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function updateProgress() {
+    const items = document.querySelectorAll('.check-item');
+    const checked = document.querySelectorAll('.check-item.checked');
+    const pct = items.length ? Math.round((checked.length / items.length) * 100) : 0;
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressLabel').textContent = checked.length + ' / ' + items.length;
+  }
+
+  function init() {
+    const state = loadState();
+    const items = document.querySelectorAll('.check-item');
+    
+    items.forEach(item => {
+      const id = item.dataset.id;
+      if (state[id]) item.classList.add('checked');
+
+      item.addEventListener('click', () => {
+        item.classList.toggle('checked');
+        const s = loadState();
+        if (item.classList.contains('checked')) { s[id] = true; } 
+        else { delete s[id]; }
+        saveState(s);
+        updateProgress();
+      });
+    });
+
+    updateProgress();
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all checkboxes?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    document.querySelectorAll('.check-item.checked').forEach(i => i.classList.remove('checked'));
+    updateProgress();
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>
